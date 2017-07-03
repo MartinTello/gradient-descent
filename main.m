@@ -13,8 +13,8 @@ fprintf(' Presione enter para comenzar')
 fprintf(' Ploteando datos...\n');
 
 %cargando datos de archivo
-datax = load('body.txt');
-datay = load('brain.txt');
+datax = load('data/body.txt');
+datay = load('data/brain.txt');
 x = datax(:, 1);
 y = datay(:, 1);
 N = length(y);
@@ -41,7 +41,7 @@ paramsRecta = [-0.3; -0.5]; % inicializar parametros de fit (valor estimado)
 
 % ejecutar gradiente descendiente
 [allParamsRecta, paramsRecta, J] = gradienteD(paramsRecta);
-
+W
 %ploteo del error
 ploteoJ(J);
 
@@ -52,9 +52,9 @@ fprintf('%f %f \n', paramsRecta(1), paramsRecta(2));
 %Graficando la funcion error
 fprintf('Presione enter para mostrar superficie del error')
 pause;
-surfContour(paramsRecta,allParamsRecta,J);
+surfContour(paramsRecta, allParamsRecta, J);
 
 
 
-fprintf('\n FIN de Ejecución')
+fprintf('\n FIN de Ejecuciï¿½n')
 

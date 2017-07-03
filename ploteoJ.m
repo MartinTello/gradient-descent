@@ -1,18 +1,17 @@
-function ploteoJ(J)
+function plotJ = ploteoJ(J, handles)
 
-global iterations
-figJ=figure();
-figure(figJ);
-hold on;
-vector_x=[];
-vector_y=[];
 
+iterations = handles.iters;
+
+vector_x = [];
+vector_y = [];
+plotJ = [];
     for i = 1 : iterations
-        vector_x=[vector_x i];
-        vector_y=[vector_y J(i)];
-        scatter(i,J(i),100,'.');     
-        plot(vector_x,vector_y,'-');
+        vector_x = [vector_x i];
+        vector_y =[vector_y J(i)];
+        axes(handles.axes3);
+        hold on;
+        plotJ = [plotJ, plot(handles.axes3, vector_x,vector_y,'r-'), scatter(i, J(i), 100, 'b.')];
         drawnow
-
     end
 end

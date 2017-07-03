@@ -1,14 +1,8 @@
-function J = calcularCosto(paramsRecta)
+function J = calcularCosto(paramsRecta, handles)
+    y = handles.y;
+    x = handles.x;
+    N = handles.N;
 
-global y;
-global x;
-
-N = length(y); % numero de puntos (entrenamiento)
-%X*paramsRecta es el (mx+b)
-%h-y es (y-(mx+b))
-errors = sum(((x * paramsRecta) - y).^2);
-
-%la division por la cantidad
-J = (( 1 / (2 * N)) * errors);
-
+    errors = sum(((x * paramsRecta) - y).^2);
+    J = (( 1 / (2 * N)) * errors);
 end

@@ -1,8 +1,8 @@
-function curvaNivel(m_vals,b_vals,J,paramsRecta,allPR)
+function curvaNivel(m_vals, b_vals, J, paramsRecta, allPR, handles)
 
-global iterations;
+iterations = handles.iterations;
 
-figContour=figure;
+axes(handles.axes4);
 contour(b_vals, m_vals, J,50)
 axis([-0.5 0.5 -0.5 0.5]);
 xlabel('b(ordenada)'); ylabel('m(pendiente)');

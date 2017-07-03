@@ -25,12 +25,6 @@ function varargout = main_GUI(varargin)
 
 % Función inicializadora . 
 function main_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
-    clc;
-    
-    handles.path = 'data';
-    handles.dataFile1 = '';
-    handles.dataFile2 = '';
-    
     % Cargamos los datos desde archivos
     handles.datax = load('data/body.txt');
     handles.datay = load('data/brain.txt');
@@ -51,33 +45,44 @@ function main_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
     y1 = polyval(fitted, x1);
     handles.mincuad = plot(handles.axes1, x1, y1);
     
-    % Labels de ejes
-    ylabel('body weights');
-    xlabel('brain weights');
-    
-    % Parámetros para aprendizaje de gradiente descendente
-    handles.iterations = 1500;
-    handles.learning_rate = 0.01;
-
-    % inicializar parametros de fit (valor estimado)
-    handles.recta_params = zeros(2, 1);
-    
-    
-    % TESTING
+    % Seteamos los labels de todos los ejes
+    axes(handles.axes1);
+    ylabel('data y'); xlabel('data x');
     axes(handles.axes2);
-    [X,Y] = meshgrid(-5:.5:5);
-    Z = Y.*sin(X) - X.*cos(Y);
-    s = surf(handles.axes2, X,Y,Z,'FaceAlpha',0.5)
-    set(rotate3d,'Enable','on');
+    xlabel('y insersect'); ylabel('slope');
+    axes(handles.axes3);
+    xlabel('iterations'); ylabel('error');
+    axes(handles.axes4);
+    xlabel('y intesect'); ylabel('slope');
+    
+    % Agregamos columna de 1s a x
+    handles.x = [ones(handles.N, 1), handles.datax(:,1)];
+
     handles.output = hObject;
     guidata(hObject, handles);
-
+    
+    handles.reset_grad_desc.Enable = 'off';
 % uiwait(handles.figure1);
 
 % --- Executes on button press in start_grad_desc.
 function start_grad_desc_Callback(hObject, eventdata, handles)
-    handles.x = [ones(handles.N, 1), handles.datax(:,1)];
-    calcularCosto(handles.x, handles.y, handles.recta_params)
+    
+    b = str2double(get(handles.b_input, 'String'));
+    m = str2double(get(handles.m_input, 'String'));
+    handles.paramsRecta = [b; m];
+    handles.learningRate = str2double(get(handles.learning_rate_input, 'String'));
+    handles.iters = str2double(get(handles.iterations_input, 'String'));
+    
+    handles.reset_grad_desc.Enable = 'off';
+    handles.start_grad_desc.Enable = 'off';
+    
+    % Ploteamos recta aproximada por gradiente descendente
+    handles.toReset = plotter(handles.paramsRecta, handles);
+    
+    handles.reset_grad_desc.Enable = 'on';
+    
+    handles.output = hObject;
+    guidata(hObject, handles);
     
 
 % Checkbox de minimos cuadrados por metodo de Gauss.
@@ -88,90 +93,58 @@ function mincuad_chk_Callback(hObject, eventdata, handles)
     else
         set(handles.mincuad,'Visible','off')
     end
+    
+    handles.output = hObject;
+    guidata(hObject, handles);
 
+% --- Executes on button press in reset_grad_desc.
+function reset_grad_desc_Callback(hObject, eventdata, handles)
+    delete(handles.toReset);
+    handles.paramsRecta = [handles.b_input.Value; handles.m_input.Value];
+    
+    handles.reset_grad_desc.Enable = 'off';
+    handles.start_grad_desc.Enable = 'on';
+    handles.output = hObject;
+    guidata(hObject, handles);
+    
+
+function b_input_Callback(hObject, eventdata, handles)
+    handles.output = hObject;
+    guidata(hObject, handles);
+    
+function m_input_Callback(hObject, eventdata, handles) %#ok<*DEFNU>
+    handles.output = hObject;
+    guidata(hObject, handles);
+    
+% De aca para abajo no usamos nada
 % --- Outputs from this function are returned to the command line.
 function varargout = main_GUI_OutputFcn(hObject, eventdata, handles) 
     varargout{1} = handles.output;
 
-
-% --- Executes on button press in select_data.
-function select_data_Callback(hObject, eventdata, handles)
-    prompt = {'Training data file 1:', 'Training data file 2:'};
-    dlg_title = 'Select training data';
-    num_lines = 1;
-    defaultans = {'path/to/data', 'data1.txt','data2.txt'};
-    answer = inputdlg(prompt, dlg_title, num_lines, defaultans);
-
-
-% --- Executes on button press in plot_data.
-function plot_data_Callback(hObject, eventdata, handles)
-% hObject    handle to plot_data (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function data_Callback(hObject, eventdata, handles)
-% hObject    handle to data (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function select_training_data_Callback(hObject, eventdata, handles)
-% hObject    handle to select_training_data (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-
-function animation_speed_Callback(hObject, eventdata, handles)
-% hObject    handle to animation_speed (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of animation_speed as text
-%        str2double(get(hObject,'String')) returns contents of animation_speed as a double
-
-
-% --- Executes during object creation, after setting all properties.
+function m_input_CreateFcn(hObject, eventdata, handles)
+function b_input_CreateFcn(hObject, eventdata, handles)
+function iterations_input_CreateFcn(hObject, eventdata, handles)
+function learning_rate_input_CreateFcn(hObject, eventdata, handles)
 function animation_speed_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to animation_speed (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+function axes2_CreateFcn(hObject, eventdata, handles)
+function axes1_CreateFcn(hObject, eventdata, handles)
 
 
 
-function iterations_Callback(hObject, eventdata, handles)
-% hObject    handle to iterations (see GCBO)
+function learning_rate_input_Callback(hObject, eventdata, handles)
+% hObject    handle to learning_rate_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of iterations as text
-%        str2double(get(hObject,'String')) returns contents of iterations as a double
+% Hints: get(hObject,'String') returns contents of learning_rate_input as text
+%        str2double(get(hObject,'String')) returns contents of learning_rate_input as a double
 
 
-% --- Executes during object creation, after setting all properties.
-function iterations_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to iterations (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in reset_grad_desc.
-function reset_grad_desc_Callback(hObject, eventdata, handles)
-% hObject    handle to reset_grad_desc (see GCBO)
+function iterations_input_Callback(hObject, eventdata, handles)
+% hObject    handle to iterations_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of iterations_input as text
+%        str2double(get(hObject,'String')) returns contents of iterations_input as a double
